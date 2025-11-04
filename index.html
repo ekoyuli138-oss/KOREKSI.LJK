@@ -158,6 +158,10 @@
             background: #dc3545;
             color: white;
         }
+        .action-buttons {
+            margin-top: 15px;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -227,8 +231,6 @@
             </div>
             <button id="btnOcr" onclick="startOCR()" disabled>🔍 Mulai Koreksi Otomatis</button>
             <button onclick="resetAll()">🗑️ Reset</button>
-            <button onclick="addStudent()" id="btnAddStudent" disabled>➕ Tambah Siswa</button>
-            <button onclick="exportToExcel()" id="btnExportAll" disabled>⬇️ Export Semua Hasil</button>
         </div>
 
         <!-- STEP 3: HASIL -->
@@ -259,8 +261,11 @@
                     </tbody>
                 </table>
             </div>
-            <button onclick="exportToExcel()" id="btnExport">⬇️ Export ke Excel</button>
-            <button onclick="window.print()">🖨️ Cetak Hasil</button>
+            <div class="action-buttons">
+                <button onclick="addStudent()" id="btnAddStudent" disabled>➕ Tambah Siswa</button>
+                <button onclick="exportToExcelAll()" id="btnExportAll" disabled>⬇️ Export Semua Hasil</button>
+                <button onclick="window.print()">🖨️ Cetak Hasil</button>
+            </div>
         </div>
 
         <footer style="text-align: center; margin-top: 30px; padding: 10px; font-size: 0.9em; color: #777;">
