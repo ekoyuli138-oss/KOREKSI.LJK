@@ -378,6 +378,14 @@
                 const { data: { text } } = await worker.recognize(file);
                 ocrResult = text;
 
+                // Ambil nama siswa dari nama file
+                let fileName = file.name;
+                // Hapus ekstensi (.jpg, .png, dll)
+                let nameWithoutExt = fileName.replace(/\.[^/.]+$/, '');
+                // Ambil bagian setelah angka dan underscore (contoh: 01_VINO.jpg → VINO)
+                let nameParts = nameWithoutExt.split('_');
+                studentName = nameParts[nameParts.length - 1] || nameWithoutExt;
+
                 // Simulasi deteksi jawaban PG (untuk demo)
                 let jawabanPG = [];
                 let jawabanIsian = [];
@@ -419,13 +427,6 @@
                     for (let i = 0; i < kunciUraian.length; i++) {
                         jawabanUraian.push('');
                     }
-                }
-
-                // Cari nama siswa (misalnya, cari teks setelah "Nama Peserta:")
-                let namaStart = text.indexOf("Nama Peserta:");
-                if (namaStart !== -1) {
-                    let namaLine = text.substring(namaStart).split('\n')[0];
-                    studentName = namaLine.replace("Nama Peserta:", "").trim();
                 }
 
                 // Hitung nilai
@@ -483,7 +484,7 @@
                 updateStudentList();
 
                 // Generate analysis table
-                generateAnalysisTable(studentName, jawabanPG, jawabanIsian, jawabanUraian, scorePG, scoreIsian, scoreUraian, totalScore);
+                generateAnalysisTable();
 
                 // Show step 3
                 document.getElementById('step2').classList.add('hidden');
@@ -543,8 +544,8 @@
             return score;
         }
 
-        // Fungsi generate analysis table
-        function generateAnalysisTable(nama, pg, isian, uraian, scorePG, scoreIsian, scoreUraian, totalScore) {
+        // Fungsi generate analysis table (menampilkan SEMUA siswa)
+        function generateAnalysisTable() {
             const headerRow = document.getElementById('headerRow');
             const analysisBody = document.getElementById('analysisBody');
             const analysisTableContainer = document.getElementById('analysisTableContainer');
@@ -566,32 +567,35 @@
             }
             headerRow.innerHTML = headerHtml;
 
-            // Generate row
-            let rowHtml = `<tr>
-                <td>1</td>
-                <td>${nama}</td>`;
+            // Generate row untuk SEMUA siswa
+            let rowHtml = '';
+            students.forEach((s, idx) => {
+                rowHtml += `<tr>
+                    <td>${idx + 1}</td>
+                    <td>${s.nama}</td>`;
 
-            // PG
-            for (let i = 0; i < jumlahPG; i++) {
-                const correct = pg[i] === kunciPG[i];
-                const className = correct ? 'correct' : 'wrong';
-                rowHtml += `<td class="${className}">${pg[i]}</td>`;
-            }
+                // PG
+                for (let i = 0; i < jumlahPG; i++) {
+                    const correct = s.jawabanPG[i] === kunciPG[i];
+                    const className = correct ? 'correct' : 'wrong';
+                    rowHtml += `<td class="${className}">${s.jawabanPG[i]}</td>`;
+                }
 
-            // Isian
-            for (let i = 0; i < jumlahIsian; i++) {
-                const correct = isian[i].toLowerCase().includes(kunciIsian[i].toLowerCase());
-                const className = correct ? 'correct' : 'wrong';
-                rowHtml += `<td class="${className}">${isian[i]}</td>`;
-            }
+                // Isian
+                for (let i = 0; i < jumlahIsian; i++) {
+                    const correct = s.jawabanIsian[i].toLowerCase().includes(kunciIsian[i].toLowerCase());
+                    const className = correct ? 'correct' : 'wrong';
+                    rowHtml += `<td class="${className}">${s.jawabanIsian[i]}</td>`;
+                }
 
-            // Uraian
-            for (let i = 0; i < jumlahUraian; i++) {
-                let score = calculateEssayScore(uraian[i], kunciUraian[i]);
-                rowHtml += `<td>${score}</td>`;
-            }
+                // Uraian
+                for (let i = 0; i < jumlahUraian; i++) {
+                    let score = calculateEssayScore(s.jawabanUraian[i], kunciUraian[i]);
+                    rowHtml += `<td>${score}</td>`;
+                }
 
-            rowHtml += `</tr>`;
+                rowHtml += `</tr>`;
+            });
             analysisBody.innerHTML = rowHtml;
 
             analysisTableContainer.style.display = 'block';
